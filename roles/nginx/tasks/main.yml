@@ -1,0 +1,61 @@
+---
+# - name: Add Nginx PPA
+#   apt_repository: repo="ppa:rtcamp/nginx"
+#   when: ansible_distribution == 'Ubuntu'
+
+- name: Install Nginx ubuntu
+  apt: name=nginx state=present force=yes
+  when: ansible_distribution == 'Ubuntu'
+
+- name: Install nginx fedora
+  dnf: name=nginx 
+  when: ansible_distribution == 'Fedora'
+
+- name: Create www directory
+  file:
+    path: /var/www/
+    state: directory
+    mode: '0775'
+
+- name: Create allow rule fedora
+  command: firewall-cmd --add-port=80/tcp
+  when: ansible_distribution == 'Fedora'
+
+- name: Create allow rule ubuntu
+  command: ufw allow 80
+  when: ansible_distribution == 'Ubuntu'
+
+- name: Add group "nginx"
+  group: name=nginx
+
+- name: Add user "nginx"
+  user: name=nginx group=nginx home=/var/www/
+
+- name: Add base NGINX configuration file
+  copy:
+    dest: /etc/nginx/nginx.conf
+    src: nginx.conf
+    owner: root
+    group: root
+    mode: 0644
+  notify: restart nginx
+
+- name: Copy site contents
+  copy:
+    dest: "{{ item.root }}/"
+    src: "{{ item.name }}/"
+    owner: root
+    group: root
+    mode: 0755
+  with_items: "{{ webserver_sites }}"
+
+- name: Add site config files
+  template:
+    src: default.conf.j2
+    dest: "/etc/nginx/conf.d/{{ item.name }}.conf"
+    owner: root
+    group: root
+    mode: 0644
+  with_items: "{{ webserver_sites }}"
+  notify: restart nginx
+

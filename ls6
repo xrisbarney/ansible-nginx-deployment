@@ -1,0 +1,9 @@
+[apt]
+sne-static2.local ansible_host=192.168.122.10
+
+[rpm]
+sne-static1.local ansible_host=192.168.122.79
+
+[all:vars]
+ansible_python_interpreter=/usr/bin/python3
+

@@ -1,0 +1,7 @@
+---
+nginx_user: "nginx"
+webserver_sites:
+  - name: sne-static2.local
+    root: /var/www/sne-static2.local
+  - name: sne-static1.local
+    root: /var/www/sne-static1.local
